@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 import connectDB from "./config/db.js";
 
 import expenseRoutes from "./routes/expenseRoutes.js";
+import settlementRoutes from "./routes/settlementRoutes.js";
 
 // convert import.meta.url to file path
 const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +25,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/settlements", settlementRoutes);
 
 connectDB();
 
