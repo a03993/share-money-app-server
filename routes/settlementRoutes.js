@@ -13,7 +13,7 @@ const validateLinkId = (req, res, next) => {
 };
 
 const validateStatus = (status) => {
-  const validStatuses = ["pending", "completed", "rejected"];
+  const validStatuses = ["pending", "completed"];
   return validStatuses.includes(status);
 };
 
@@ -83,8 +83,7 @@ router.put("/:linkId/:settlementId", validateLinkId, async (req, res) => {
 
     if (!status || !validateStatus(status)) {
       return res.status(400).json({
-        message:
-          "Invalid status. Status must be one of: pending, completed, rejected",
+        message: "Invalid status. Status must be one of: pending, completed",
       });
     }
 
