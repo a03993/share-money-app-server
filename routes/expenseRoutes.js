@@ -1,27 +1,13 @@
 import express from "express";
 import Expense from "../models/expenseModel.js";
-import { calculateTotalAmount } from "../utils/expenseCalculations.js";
+import {
+  calculateTotalAmount,
+  findUserCaseInsensitive,
+  getExistingUserNames,
+} from "../utils/expenseUtils.js";
+import { validateLinkId } from "../middlewares/validations.js";
 
 const router = express.Router();
-
-// Helper functions
-const validateLinkId = (req, res, next) => {
-  const linkId = req.params.linkId || req.body.linkId;
-  if (!linkId) {
-    return res.status(400).json({ message: "LinkId is required" });
-  }
-  next();
-};
-
-const findUserCaseInsensitive = (expenses, username) => {
-  return expenses.find(
-    (exp) => exp.name.toLowerCase() === username.toLowerCase()
-  );
-};
-
-const getExistingUserNames = (expenses) => {
-  return new Set(expenses.map((exp) => exp.name.toLowerCase()));
-};
 
 // Routes
 router.post("/", validateLinkId, async (req, res) => {

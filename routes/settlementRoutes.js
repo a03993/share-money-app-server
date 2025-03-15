@@ -4,23 +4,10 @@ import {
   calculateTotalExpensePerPerson,
   calculateAmountPaidByEachPerson,
   calculatePayments,
-} from "../utils/settlementCalculations.js";
+} from "../utils/settlementUtils.js";
+import { validateLinkId, validateStatus } from "../middlewares/validations.js";
 
 const router = express.Router();
-
-// Helper functions
-const validateLinkId = (req, res, next) => {
-  const linkId = req.params.linkId || req.body.linkId;
-  if (!linkId) {
-    return res.status(400).json({ message: "LinkId is required" });
-  }
-  next();
-};
-
-const validateStatus = (status) => {
-  const validStatuses = ["pending", "completed"];
-  return validStatuses.includes(status);
-};
 
 // Routes
 router.get("/:linkId", validateLinkId, async (req, res) => {
