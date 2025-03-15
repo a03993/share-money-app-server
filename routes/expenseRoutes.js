@@ -1,5 +1,6 @@
 import express from "express";
 import Expense from "../models/expenseModel.js";
+import { calculateTotalAmount } from "../utils/expenseCalculations.js";
 
 const router = express.Router();
 
@@ -95,9 +96,13 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
       return res.status(404).json({ message: "Expenses Page not found" });
     }
 
+    // Calculate total amount
+    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+
     return res.status(200).json({
       linkId: currentExpense.linkId,
       expenses: currentExpense.expenses,
+      totalAmount,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -155,7 +160,11 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
 
     payerExpense.personalExpenses.push({ item, amount, sharedBy });
     const updatedExpense = await currentExpense.save();
-    return res.status(201).json(updatedExpense);
+
+    // Calculate total amount
+    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+
+    return res.status(201).json({ updatedExpense, totalAmount });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -191,7 +200,11 @@ router.delete("/:linkId", validateLinkId, async (req, res) => {
     }
 
     const updatedExpense = await currentExpense.save();
-    return res.status(200).json(updatedExpense);
+
+    // Calculate total amount
+    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+
+    return res.status(200).json({ updatedExpense, totalAmount });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
