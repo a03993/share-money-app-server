@@ -1,5 +1,10 @@
 import express from "express";
 import Settlement from "../models/settlementModel.js";
+import {
+  calculateTotalExpensePerPerson,
+  calculateAmountPaidByEachPerson,
+  calculatePayments,
+} from "../utils/settlementCalculations.js";
 
 const router = express.Router();
 
@@ -48,13 +53,21 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
 router.post("/:linkId", validateLinkId, async (req, res) => {
   try {
     const { linkId } = req.params;
-    const { settlements } = req.body;
+    const { currentExpenseItem } = req.body;
 
-    if (!settlements || !Array.isArray(settlements)) {
+    if (!currentExpenseItem) {
       return res.status(400).json({
-        message: "Invalid settlements data. Settlements must be an array",
+        message: "Invalid data. Please provide currentExpenseItem",
       });
     }
+
+    const actualExpense = calculateTotalExpensePerPerson(currentExpenseItem);
+    const paidAmount = calculateAmountPaidByEachPerson(currentExpenseItem);
+    const settlements = calculatePayments(
+      actualExpense,
+      paidAmount,
+      currentExpenseItem
+    );
 
     const settlementsWithStatus = settlements.map((settlement) => ({
       ...settlement,
