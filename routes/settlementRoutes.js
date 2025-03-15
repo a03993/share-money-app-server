@@ -78,30 +78,23 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
 router.put("/:linkId/:settlementId", validateLinkId, async (req, res) => {
   try {
     const { linkId, settlementId } = req.params;
-    const { status } = req.body;
 
-    if (!status || !validateStatus(status)) {
-      return res.status(400).json({
-        message: "Invalid status. Status must be one of: pending, completed",
-      });
-    }
-
-    const settlement = await Settlement.findOne({ linkId });
-    if (!settlement) {
+    const foundSettlement = await Settlement.findOne({ linkId });
+    if (!foundSettlement) {
       return res.status(404).json({ message: "Settlement not found" });
     }
 
-    const settlementDetail = settlement.settlements.id(settlementId);
+    const settlementDetail = foundSettlement.settlements.id(settlementId);
     if (!settlementDetail) {
       return res.status(404).json({ message: "Settlement detail not found" });
     }
 
-    settlementDetail.status = status;
-    await settlement.save();
+    settlementDetail.status =
+      settlementDetail.status === "pending" ? "completed" : "pending";
+    await foundSettlement.save();
 
     return res.status(200).json({
-      linkId: settlement.linkId,
-      settlement: settlementDetail,
+      settlements: foundSettlement.settlements,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
