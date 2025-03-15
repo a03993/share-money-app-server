@@ -13,9 +13,9 @@ const router = express.Router();
 router.get("/:linkId", validateLinkId, async (req, res) => {
   try {
     const { linkId } = req.params;
-    const settlement = await Settlement.findOne({ linkId });
+    const foundSettlement = await Settlement.findOne({ linkId });
 
-    if (!settlement) {
+    if (!foundSettlement) {
       const newSettlement = new Settlement({
         linkId,
         settlements: [],
@@ -29,8 +29,8 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
     }
 
     return res.status(200).json({
-      linkId: settlement.linkId,
-      settlements: settlement.settlements,
+      linkId: foundSettlement.linkId,
+      settlements: foundSettlement.settlements,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -61,15 +61,14 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
       status: "pending",
     }));
 
-    const settlement = await Settlement.findOneAndUpdate(
+    const updatedSettlement = await Settlement.findOneAndUpdate(
       { linkId },
       { settlements: settlementsWithStatus },
       { new: true, upsert: true }
     );
 
     return res.status(201).json({
-      linkId: settlement.linkId,
-      settlements: settlement.settlements,
+      settlements: updatedSettlement.settlements,
     });
   } catch (error) {
     return res.status(500).json({ message: error.message });
