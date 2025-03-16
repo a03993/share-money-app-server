@@ -1,6 +1,6 @@
 import express from "express";
 import Expense from "../models/expenseModel.js";
-// import Settlement from "../models/settlementModel.js";
+
 import {
   calculateTotalExpensePerPerson,
   calculateAmountPaidByEachPerson,
@@ -10,8 +10,7 @@ import { validateLinkId } from "../middlewares/validations.js";
 
 const router = express.Router();
 
-// Routes
-router.get("/:linkId", validateLinkId, async (req, res) => {
+router.get("/:linkId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.params;
     const foundExpense = await Expense.findOne({ linkId });
@@ -24,11 +23,11 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
       settlements: foundExpense.settlements,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.post("/:linkId", validateLinkId, async (req, res) => {
+router.post("/:linkId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.params;
     const { expenseList } = req.body;
@@ -62,11 +61,11 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
       settlements: foundExpense.settlements,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.put("/:linkId/:settlementId", validateLinkId, async (req, res) => {
+router.put("/:linkId/:settlementId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId, settlementId } = req.params;
 
@@ -88,7 +87,7 @@ router.put("/:linkId/:settlementId", validateLinkId, async (req, res) => {
       settlements: foundExpense.settlements,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 

@@ -9,8 +9,7 @@ import { validateLinkId } from "../middlewares/validations.js";
 
 const router = express.Router();
 
-// Routes
-router.post("/", validateLinkId, async (req, res) => {
+router.post("/", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.body;
     const existingExpense = await Expense.findOne({ linkId });
@@ -27,11 +26,11 @@ router.post("/", validateLinkId, async (req, res) => {
     const savedExpense = await newExpense.save();
     return res.status(201).json(savedExpense);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.post("/:linkId/users", validateLinkId, async (req, res) => {
+router.post("/:linkId/users", validateLinkId, async (req, res, next) => {
   try {
     const { users } = req.body;
     const { linkId } = req.params;
@@ -69,11 +68,11 @@ router.post("/:linkId/users", validateLinkId, async (req, res) => {
     const updatedExpense = await foundExpense.save();
     return res.status(200).json(updatedExpense);
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.get("/:linkId", validateLinkId, async (req, res) => {
+router.get("/:linkId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.params;
     const foundExpense = await Expense.findOne({ linkId });
@@ -82,7 +81,6 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
       return res.status(404).json({ message: "Expenses Page not found" });
     }
 
-    // Calculate total amount
     const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(200).json({
@@ -92,11 +90,11 @@ router.get("/:linkId", validateLinkId, async (req, res) => {
       totalAmount,
     });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.post("/:linkId", validateLinkId, async (req, res) => {
+router.post("/:linkId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.params;
     const { item, amount, payer, sharedBy } = req.body;
@@ -145,16 +143,15 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
     payerExpense.personalExpenses.push({ item, amount, sharedBy });
     const updatedExpense = await foundExpense.save();
 
-    // Calculate total amount
     const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(201).json({ updatedExpense, totalAmount });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
-router.delete("/:linkId", validateLinkId, async (req, res) => {
+router.delete("/:linkId", validateLinkId, async (req, res, next) => {
   try {
     const { linkId } = req.params;
     const { _id } = req.body;
@@ -185,12 +182,11 @@ router.delete("/:linkId", validateLinkId, async (req, res) => {
 
     const updatedExpense = await foundExpense.save();
 
-    // Calculate total amount
     const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(200).json({ updatedExpense, totalAmount });
   } catch (error) {
-    return res.status(500).json({ message: error.message });
+    next(error);
   }
 });
 
