@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
 import { SettlementSchema } from "./settlementModel.js";
+import {
+  validatePositiveInteger,
+  validateNonEmptyArray,
+  validateUniqueSharedBy,
+  validateHexColor,
+} from "../middlewares/validations.js";
 
 const personalExpenseSchema = new mongoose.Schema(
   {
@@ -13,34 +19,29 @@ const personalExpenseSchema = new mongoose.Schema(
     amount: {
       type: Number,
       required: true,
-      min: [0, "Amount must be greater than 0"],
+      min: [1, "Amount must be greater than 0"],
       max: [999999999, "Amount is too large"],
       validate: {
-        validator: function (value) {
-          return Number.isSafeInteger(value) && value >= 0;
-        },
+        validator: validatePositiveInteger,
         message: "Amount must be a valid positive integer",
       },
     },
-    sharedBy: [
-      {
-        type: String,
-        required: true,
-        validate: {
+    sharedBy: {
+      type: [String],
+      required: true,
+      validate: [
+        {
           validator: function (v) {
-            return v.length > 0;
+            return validateNonEmptyArray(this.sharedBy);
           },
           message: "At least one user must share the expense",
         },
-      },
-      {
-        validator: function (v) {
-          // check if there are duplicate users in sharedBy
-          return new Set(this.sharedBy).size === this.sharedBy.length;
+        {
+          validator: validateUniqueSharedBy,
+          message: "Duplicate users are not allowed in sharedBy",
         },
-        message: "Duplicate users are not allowed in sharedBy",
-      },
-    ],
+      ],
+    },
   },
   { timestamps: true }
 );
@@ -58,13 +59,14 @@ const userExpenseSchema = new mongoose.Schema(
       type: String,
       required: true,
       validate: {
-        validator: function (v) {
-          return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(v);
-        },
+        validator: validateHexColor,
         message: "Color must be a valid hex color code",
       },
     },
-    personalExpenses: [personalExpenseSchema],
+    personalExpenses: {
+      type: [personalExpenseSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
@@ -72,8 +74,14 @@ const userExpenseSchema = new mongoose.Schema(
 const expenseSchema = new mongoose.Schema(
   {
     linkId: { type: String, required: true, unique: true },
-    expenses: [userExpenseSchema],
-    settlements: [SettlementSchema],
+    expenses: {
+      type: [userExpenseSchema],
+      default: [],
+    },
+    settlements: {
+      type: [SettlementSchema],
+      default: [],
+    },
   },
   { timestamps: true }
 );
