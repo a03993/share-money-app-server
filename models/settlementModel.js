@@ -1,4 +1,8 @@
 import mongoose from "mongoose";
+import {
+  validatePositiveInteger,
+  validateHexColor,
+} from "../middlewares/validations.js";
 
 const UserInfoSchema = new mongoose.Schema({
   name: {
@@ -12,9 +16,7 @@ const UserInfoSchema = new mongoose.Schema({
     type: String,
     required: true,
     validate: {
-      validator: function (v) {
-        return /^#[0-9A-Fa-f]{6}$/.test(v);
-      },
+      validator: validateHexColor,
       message: "Invalid color format",
     },
   },
@@ -25,19 +27,19 @@ export const SettlementSchema = new mongoose.Schema(
     payer: {
       type: UserInfoSchema,
       required: true,
+      default: {},
     },
     payee: {
       type: UserInfoSchema,
       required: true,
+      default: {},
     },
     amount: {
       type: Number,
       required: true,
       min: [1, "Amount must be greater than 0"],
       validate: {
-        validator: function (value) {
-          return !isNaN(value) && isFinite(value) && Number.isInteger(value);
-        },
+        validator: validatePositiveInteger,
         message: "Amount must be a valid integer",
       },
     },

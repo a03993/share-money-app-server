@@ -6,7 +6,7 @@ import {
   calculateAmountPaidByEachPerson,
   calculatePayments,
 } from "../utils/settlementUtils.js";
-import { validateLinkId, validateStatus } from "../middlewares/validations.js";
+import { validateLinkId } from "../middlewares/validations.js";
 
 const router = express.Router();
 

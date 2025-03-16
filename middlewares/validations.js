@@ -22,8 +22,3 @@ export const validateHexColor = (value) => {
   const hexColorRegex = /^#([0-9A-F]{3}|[0-9A-F]{6})$/i;
   return hexColorRegex.test(value);
 };
-
-export const validateStatus = (status) => {
-  const validStatuses = ["pending", "completed"];
-  return validStatuses.includes(status);
-};
