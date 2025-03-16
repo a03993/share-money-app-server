@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { SettlementSchema } from "./settlementModel.js";
 
 const personalExpenseSchema = new mongoose.Schema(
   {
@@ -72,6 +73,7 @@ const expenseSchema = new mongoose.Schema(
   {
     linkId: { type: String, required: true, unique: true },
     expenses: [userExpenseSchema],
+    settlements: [SettlementSchema],
   },
   { timestamps: true }
 );

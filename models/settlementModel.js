@@ -20,7 +20,7 @@ const UserInfoSchema = new mongoose.Schema({
   },
 });
 
-const SettlementDetailSchema = new mongoose.Schema(
+export const SettlementSchema = new mongoose.Schema(
   {
     payer: {
       type: UserInfoSchema,
@@ -49,13 +49,3 @@ const SettlementDetailSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
-
-const SettlementSchema = new mongoose.Schema(
-  {
-    linkId: { type: String, required: true, ref: "Expense" },
-    settlements: [SettlementDetailSchema],
-  },
-  { timestamps: true }
-);
-
-export default mongoose.model("Settlement", SettlementSchema);

@@ -1,9 +1,9 @@
-export const calculateTotalExpensePerPerson = (currentExpenseItem) => {
-  if (!currentExpenseItem) return [];
+export const calculateTotalExpensePerPerson = (expenseList) => {
+  if (!expenseList) return [];
 
   const totalExpenses = {};
 
-  currentExpenseItem.expenses.forEach(({ name, personalExpenses }) => {
+  expenseList.expenses.forEach(({ name, personalExpenses }) => {
     const personTotal = personalExpenses.reduce(
       (expenseSum, { amount }) => expenseSum + amount,
       0
@@ -17,12 +17,12 @@ export const calculateTotalExpensePerPerson = (currentExpenseItem) => {
   }));
 };
 
-export const calculateAmountPaidByEachPerson = (currentExpenseItem) => {
-  if (!currentExpenseItem) return [];
+export const calculateAmountPaidByEachPerson = (expenseList) => {
+  if (!expenseList) return [];
 
   const amountPaid = {};
 
-  currentExpenseItem.expenses.forEach(({ name, personalExpenses }) => {
+  expenseList.expenses.forEach(({ name, personalExpenses }) => {
     personalExpenses.forEach(({ amount, sharedBy }) => {
       if (sharedBy && sharedBy.length > 0) {
         const splitAmount = amount / sharedBy.length;
@@ -42,11 +42,7 @@ export const calculateAmountPaidByEachPerson = (currentExpenseItem) => {
   }));
 };
 
-export const calculatePayments = (
-  actualExpense,
-  paidAmount,
-  currentExpenseItem
-) => {
+export const calculatePayments = (actualExpense, paidAmount, expenseList) => {
   const balance = {};
 
   actualExpense.forEach(({ name, actualExpense }) => {
@@ -75,10 +71,10 @@ export const calculatePayments = (
     const payee = payees[payeeIndex];
     const transferAmount = Math.min(payer.amount, payee.amount);
 
-    const payerColor = currentExpenseItem.expenses.find(
+    const payerColor = expenseList.expenses.find(
       (person) => person.name === payer.name
     )?.color;
-    const payeeColor = currentExpenseItem.expenses.find(
+    const payeeColor = expenseList.expenses.find(
       (person) => person.name === payee.name
     )?.color;
 

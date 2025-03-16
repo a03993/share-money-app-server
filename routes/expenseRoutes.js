@@ -48,12 +48,12 @@ router.post("/:linkId/users", validateLinkId, async (req, res) => {
       });
     }
 
-    const currentExpense = await Expense.findOne({ linkId });
-    if (!currentExpense) {
+    const foundExpense = await Expense.findOne({ linkId });
+    if (!foundExpense) {
       return res.status(404).json({ message: "Expense Page not found" });
     }
 
-    const existingUsers = getExistingUserNames(currentExpense.expenses);
+    const existingUsers = getExistingUserNames(foundExpense.expenses);
     const duplicateUsers = users.filter((user) =>
       existingUsers.has(user.name.toLowerCase())
     );
@@ -65,8 +65,8 @@ router.post("/:linkId/users", validateLinkId, async (req, res) => {
       });
     }
 
-    currentExpense.expenses.push(...users);
-    const updatedExpense = await currentExpense.save();
+    foundExpense.expenses.push(...users);
+    const updatedExpense = await foundExpense.save();
     return res.status(200).json(updatedExpense);
   } catch (error) {
     return res.status(500).json({ message: error.message });
@@ -76,18 +76,19 @@ router.post("/:linkId/users", validateLinkId, async (req, res) => {
 router.get("/:linkId", validateLinkId, async (req, res) => {
   try {
     const { linkId } = req.params;
-    const currentExpense = await Expense.findOne({ linkId });
+    const foundExpense = await Expense.findOne({ linkId });
 
-    if (!currentExpense) {
+    if (!foundExpense) {
       return res.status(404).json({ message: "Expenses Page not found" });
     }
 
     // Calculate total amount
-    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+    const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(200).json({
-      linkId: currentExpense.linkId,
-      expenses: currentExpense.expenses,
+      linkId: foundExpense.linkId,
+      expenses: foundExpense.expenses,
+      settlements: foundExpense.settlements,
       totalAmount,
     });
   } catch (error) {
@@ -119,20 +120,17 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
       });
     }
 
-    const currentExpense = await Expense.findOne({ linkId });
-    if (!currentExpense) {
+    const foundExpense = await Expense.findOne({ linkId });
+    if (!foundExpense) {
       return res.status(404).json({ message: "Expense Page not found" });
     }
 
-    const payerExpense = findUserCaseInsensitive(
-      currentExpense.expenses,
-      payer
-    );
+    const payerExpense = findUserCaseInsensitive(foundExpense.expenses, payer);
     if (!payerExpense) {
       return res.status(404).json({ message: "Payer not found" });
     }
 
-    const existingUsers = getExistingUserNames(currentExpense.expenses);
+    const existingUsers = getExistingUserNames(foundExpense.expenses);
     const invalidUsers = sharedBy.filter(
       (user) => !existingUsers.has(user.toLowerCase())
     );
@@ -145,10 +143,10 @@ router.post("/:linkId", validateLinkId, async (req, res) => {
     }
 
     payerExpense.personalExpenses.push({ item, amount, sharedBy });
-    const updatedExpense = await currentExpense.save();
+    const updatedExpense = await foundExpense.save();
 
     // Calculate total amount
-    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+    const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(201).json({ updatedExpense, totalAmount });
   } catch (error) {
@@ -165,13 +163,13 @@ router.delete("/:linkId", validateLinkId, async (req, res) => {
       return res.status(400).json({ message: "Expense ID is required" });
     }
 
-    const currentExpense = await Expense.findOne({ linkId });
-    if (!currentExpense) {
+    const foundExpense = await Expense.findOne({ linkId });
+    if (!foundExpense) {
       return res.status(404).json({ message: "Expense Page not found" });
     }
 
     let itemFound = false;
-    currentExpense.expenses.forEach((person) => {
+    foundExpense.expenses.forEach((person) => {
       const originalLength = person.personalExpenses.length;
       person.personalExpenses = person.personalExpenses.filter(
         (exp) => exp._id.toString() !== _id
@@ -185,10 +183,10 @@ router.delete("/:linkId", validateLinkId, async (req, res) => {
       return res.status(404).json({ message: "Expense item not found" });
     }
 
-    const updatedExpense = await currentExpense.save();
+    const updatedExpense = await foundExpense.save();
 
     // Calculate total amount
-    const totalAmount = calculateTotalAmount(currentExpense.expenses);
+    const totalAmount = calculateTotalAmount(foundExpense.expenses);
 
     return res.status(200).json({ updatedExpense, totalAmount });
   } catch (error) {
