@@ -46,14 +46,9 @@ router.post("/:linkId", validateLinkId, async (req, res, next) => {
       expenseList
     );
 
-    const settlementsWithStatus = settlements.map((settlement) => ({
-      ...settlement,
-      status: "pending",
-    }));
-
     const foundExpense = await Expense.findOneAndUpdate(
       { linkId },
-      { $set: { settlements: settlementsWithStatus } },
+      { settlements: settlements },
       { new: true, upsert: true }
     );
 
